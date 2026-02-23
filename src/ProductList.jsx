@@ -5,7 +5,7 @@ import "./ProductList.css";
 import CartItem from "./CartItem";
 import { addItem } from "./CartSlice";
 
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 function ProductList({ onHomeClick }) {
   const [showCart, setShowCart] = useState(false);
@@ -13,6 +13,11 @@ function ProductList({ onHomeClick }) {
 
   const [addedToCart, setaddedToCart] = useState({});
 
+
+  const cartItems = useSelector((state) => state.cart.items);
+
+  const calculateTotalQuantity = () =>{
+    return cartItems ? cartItems.reduce((total, item) => total + item.quantity, 0) : 0;}
 
   const dispatch = useDispatch();
 
@@ -302,7 +307,7 @@ function ProductList({ onHomeClick }) {
 
   const handleAddToCart = (plants) => {
     dispatch(addItem(plants));
-
+    setButtonDisabled(true);
     setaddedToCart((prevState) => ({
       ...prevState,
       [plants.name]: true,
@@ -334,10 +339,12 @@ function ProductList({ onHomeClick }) {
               Plants
             </a>
           </div>
+
           <div>
             {" "}
             <a href="#" onClick={(e) => handleCartClick(e)} style={styleA}>
               <h1 className="cart">
+                <span className="cart-badge">{calculateTotalQuantity()}</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 256 256"
@@ -402,17 +409,34 @@ function ProductList({ onHomeClick }) {
                         {/* Display plant description */}
                         <div className="product-cost">${plant.cost}</div>{" "}
                         {/* Display plant cost */}
-                        {plant.name ? <button
-                          className="product-button"
-                          onClick={() => handleAddToCart(plant)} // Handle adding plant to cart
+                        {/* {plant ? (
+                          <button
+                            className="product-button"
+                            onClick={() => handleAddToCart(plant)} // Handle adding plant to cart
+                          >
+                            Add to Cart
+                          </button>
+                        ) : (
+                          <button
+                            className="product-button"
+                            onClick={() => handleAddToCart(plant)} // Handle adding plant to cart
+                          >
+                            ADDED
+                          </button>
+                        )} */}
+                        <button
+                          className={
+                            addedToCart[plant.name]
+                              ? "product-button.added-to-cart"
+                              : "product-button"
+                          }
+                          onClick={() => handleAddToCart(plant)}
                         >
-                          Add to Cart
-                        </button> : <button
-                          className="product-button"
-                          onClick={() => handleAddToCart(plant)} // Handle adding plant to cart
-                        >
-                          ADDED
-                        </button> }
+                          {" "}
+                          {addedToCart[plant.name]
+                            ? "Added to Cart"
+                            : "Add to Cart"}
+                        </button>
                       </div>
                     ),
                   )}
